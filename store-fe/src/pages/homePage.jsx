@@ -19,7 +19,6 @@ const HomePage = () => {
   }
 
   useEffect(() => {
-    console.log("here")
     fetchAllItems()
   }, [])
 
