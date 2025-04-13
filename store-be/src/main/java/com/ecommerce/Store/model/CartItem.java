@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Item {
+public class CartItem {
     private String id;
     private String image;
     private String name;
     private String description;
     private double price;
-    private int quantity;
+    private int count;
 }
