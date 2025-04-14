@@ -70,6 +70,57 @@ public class CartService {
         //update cart
         cartMemory.updateCart(userId, userCart);
         log.info("[addItemToCart] Cart updated for user: {}", userId);
+
+    }
+
+    public void removeItemFromCart(ICartItems.Request request) {
+        String userId = request.userId();
+        String itemId = request.id();
+        log.info("[removeItemFromCart] Removing item from cart for user: {}", userId);
+
+        if (Objects.isNull(itemId) || !StringUtils.hasLength(itemId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please select an item");
+        }
+
+        // Get user's cart
+        List<CartItem> userCart = cartMemory.getCart(userId);
+        Optional<CartItem> existingCartItem = userCart.stream()
+                .filter(item -> item.getId().equals(itemId))
+                .findFirst();
+
+        if (existingCartItem.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item not present in cart");
+        }
+
+        CartItem cartItem = existingCartItem.get();
+
+        // Get the store item
+        Item storeItem = storeMemory.getItemById(itemId);
+        if (storeItem == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found in store");
+        }
+
+        // Check if the item's current quantity exceeds initial quantity
+        if (storeItem.getQuantity() >= storeItem.getInitialQuantity()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item stock already full in store");
+        }
+
+        // Add an item to store quantity
+        storeItem.setQuantity(storeItem.getQuantity() + 1);
+        log.info("[removeItemFromCart] Updated store quantity for item: {} | quantity: {}", itemId, storeItem.getQuantity());
+
+        // Remove from cart
+        if (cartItem.getCount() > 1) {
+            cartItem.setCount(cartItem.getCount() - 1);
+            log.info("[removeItemFromCart] Decreased cart item count for user: {}", userId);
+        } else {
+            userCart.remove(cartItem);
+            log.info("[removeItemFromCart] Removed item from cart for user: {}", userId);
+        }
+
+        // Update cart
+        cartMemory.updateCart(userId, userCart);
+        log.info("[removeItemFromCart] Cart updated for user: {}", userId);
     }
 
     public ICartItems.Response getCartItems(String userId) {

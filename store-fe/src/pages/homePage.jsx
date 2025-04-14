@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { API_BASE_URL } from "../../utils/api";
 import { toast } from "react-toastify";
 import axios from "axios";
 
@@ -11,10 +10,7 @@ const HomePage = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  console.log("ITEMS::", items);
-
   const handleAddItemToCart = async (theId, theName) => {
-    console.log("*****", { theId, theName });
     try {
       await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/v1/store/cart/add`,

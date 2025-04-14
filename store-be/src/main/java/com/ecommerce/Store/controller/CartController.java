@@ -20,6 +20,12 @@ public class CartController {
         cartService.addItemToCart(request);
     }
 
+    @PostMapping("/remove")
+    @ResponseBody
+    public void removeItemFromCart(@RequestBody ICartItems.Request request) {
+        cartService.removeItemFromCart(request);
+    }
+
     @GetMapping("/all")
     public ICartItems.Response getCartItems(@RequestParam("user_id") String userId) {
         return cartService.getCartItems(userId);

@@ -1,7 +1,6 @@
 import React from "react";
 
 const ItemCard = ({ data, handleAddItemToCard = () => {} }) => {
-  console.log("ITEM DATA:", data);
   return (
     <div className="homepage-card">
       <img className="homepage-card-image" src={data?.image} alt={data?.name} />
