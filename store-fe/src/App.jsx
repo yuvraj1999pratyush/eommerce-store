@@ -1,12 +1,26 @@
-import { Routes, Route } from 'react-router'
-import HomePage from './pages/homePage'
+import { Routes, Route } from "react-router";
+import HomePage from "./pages/homePage";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/cart" element={<p>CART</p>} />
-      <Route path="/checkout" element={<p>CHECKOUT</p>} />
-    </Routes>
-  )
+    <>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/cart" element={<p>CART</p>} />
+        <Route path="/checkout" element={<p>CHECKOUT</p>} />
+      </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="light"
+      />
+    </>
+  );
 }

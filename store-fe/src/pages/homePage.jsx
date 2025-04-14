@@ -1,32 +1,69 @@
-import React, {useState, useEffect} from 'react'
-import { API_BASE_URL } from '../../utils/api'
+import React, { useState, useEffect } from "react";
+import { API_BASE_URL } from "../../utils/api";
+import { toast } from "react-toastify";
+import axios from "axios";
+
+import "../styles/common.css";
+import "../styles/homePage.css";
+import ItemCard from "../components/itemCard";
 
 const HomePage = () => {
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  console.log("ITEMS::", items);
+
+  const handleAddItemToCart = async (theId, theName) => {
+    console.log("*****", { theId, theName });
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/v1/store/cart/add`,
+        {
+          user_id: import.meta.env.VITE_USER_ID_1,
+          id: theId,
+        }
+      );
+      fetchAllItems();
+      toast.success(`${theName} added to cart`);
+    } catch (err) {
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+      } else {
+        toast.error(`Failed to add ${theName} to cart`);
+      }
+    }
+  };
 
   const fetchAllItems = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/v1/store/items/all`)
-      const data = await res.json()
-      setItems(data.items || [])
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/v1/store/items/all`
+      );
+      setItems(res?.data?.items || []);
     } catch (error) {
-      console.error("Failed to fetch items:", error)
+      console.error(error);
+      toast.error("Failed to fetch items. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchAllItems()
-  }, [])
+    fetchAllItems();
+  }, []);
 
-  if (loading) return <p>Loading items...</p>
+  if (loading) return <p>Loading items...</p>;
 
   return (
-    <div>homePage</div>
-  )
-}
+    <div className="parent-cont homepage">
+      {items?.map((item) => {
+        return (
+          <ItemCard data={item} handleAddItemToCard={handleAddItemToCart} />
+        );
+      })}
+    </div>
+  );
+};
 
-export default HomePage
+export default HomePage;
