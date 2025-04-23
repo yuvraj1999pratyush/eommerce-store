@@ -2,9 +2,11 @@ package com.ecommerce.Store.service;
 
 import com.ecommerce.Store.dto.ICartItems;
 import com.ecommerce.Store.model.CartItem;
+import com.ecommerce.Store.model.DiscountCode;
 import com.ecommerce.Store.model.Item;
 import com.ecommerce.Store.store.CartMemory;
 import com.ecommerce.Store.store.CouponMemory;
+import com.ecommerce.Store.store.GlobalStatsMemory;
 import com.ecommerce.Store.store.StoreMemory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ public class CartService {
     private final StoreMemory storeMemory;
     private final CartMemory cartMemory;
     private final CouponMemory couponMemory;
+    private final GlobalStatsMemory globalStatsMemory;
 
     public void addItemToCart(ICartItems.Request request) {
         String userId = request.userId();
@@ -142,6 +145,48 @@ public class CartService {
         boolean isCouponEligible = couponMemory.isEligibleForNewCoupon();
         log.info("[isUserEligibleForCoupon] got response isCouponEligible:{} for user: {}", isCouponEligible, userId);
         return ICartItems.validateResponse.builder().isCouponEligible(isCouponEligible).build();
+    }
+
+    public ICartItems.BuyResponse buyCartItems(ICartItems.BuyRequest request) {
+        log.info("[buyCartItems] purchasing cart items for : {}", request.userId());
+        String userId = request.userId();
+        DiscountCode appliedCode = request.coupon();
+
+        ICartItems.Response cartItemsRes = this.getCartItems(userId);
+        List<CartItem> cartItems = cartItemsRes.cartItems();
+        if (cartItems.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No items found in the cart");
+        }
+
+        int totalItems = 0;
+        double totalAmount = 0.0;
+
+        for (CartItem item : cartItemsRes.cartItems()) {
+            totalItems += item.getCount();
+            totalAmount += item.getPrice() * item.getCount();
+        }
+
+        double discountAmount = 0.0;
+
+        if (appliedCode != null && couponMemory.isCouponValid(appliedCode.getCode())) {
+            discountAmount = totalAmount * (appliedCode.getDiscountPercent() / 100.0);
+            couponMemory.markCouponUsed();
+        } else {
+            appliedCode = null;
+        }
+
+        double netAmount = totalAmount - discountAmount;
+
+        globalStatsMemory.addPurchase(totalItems, totalAmount, appliedCode);
+        log.info("[buyCartItems] added info to global stats");
+
+        cartMemory.clearUserCart(userId);
+
+        return ICartItems.BuyResponse.builder()
+                .orderItems(totalItems)
+                .orderAmount(netAmount)
+                .discountAmount(discountAmount)
+                .build();
     }
 
 }

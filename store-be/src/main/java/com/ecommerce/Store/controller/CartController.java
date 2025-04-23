@@ -1,12 +1,9 @@
 package com.ecommerce.Store.controller;
 
 import com.ecommerce.Store.dto.ICartItems;
-import com.ecommerce.Store.model.CartItem;
 import com.ecommerce.Store.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/v1/store/cart")
@@ -34,6 +31,12 @@ public class CartController {
     @GetMapping("/validate")
     public ICartItems.validateResponse validateCouponEligibility(@RequestParam("user_id") String userId) {
         return cartService.isUserEligibleForCoupon(userId);
+    }
+
+    @PostMapping("/buy")
+    @ResponseBody
+    public ICartItems.BuyResponse buyCartItems(@RequestBody ICartItems.BuyRequest request) {
+        return cartService.buyCartItems(request);
     }
 
 }

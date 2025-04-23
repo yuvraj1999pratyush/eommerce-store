@@ -20,4 +20,8 @@ public class CartMemory {
     public void updateCart(String userId, List<CartItem> updatedCart) {
         userCarts.put(userId, updatedCart);
     }
+
+    public void clearUserCart(String userId) {
+        userCarts.remove(userId);
+    }
 }
