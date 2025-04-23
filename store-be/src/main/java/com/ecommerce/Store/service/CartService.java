@@ -4,6 +4,7 @@ import com.ecommerce.Store.dto.ICartItems;
 import com.ecommerce.Store.model.CartItem;
 import com.ecommerce.Store.model.Item;
 import com.ecommerce.Store.store.CartMemory;
+import com.ecommerce.Store.store.CouponMemory;
 import com.ecommerce.Store.store.StoreMemory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ public class CartService {
 
     private final StoreMemory storeMemory;
     private final CartMemory cartMemory;
+    private final CouponMemory couponMemory;
 
     public void addItemToCart(ICartItems.Request request) {
         String userId = request.userId();
@@ -133,6 +135,13 @@ public class CartService {
         return ICartItems.Response.builder()
                 .cartItems(cartItems)
                 .build();
+    }
+
+    public ICartItems.validateResponse isUserEligibleForCoupon(String userId) {
+        log.info("[isUserEligibleForCoupon] validating if coupon is valid for: {}", userId);
+        boolean isCouponEligible = couponMemory.isEligibleForNewCoupon();
+        log.info("[isUserEligibleForCoupon] got response isCouponEligible:{} for user: {}", isCouponEligible, userId);
+        return ICartItems.validateResponse.builder().isCouponEligible(isCouponEligible).build();
     }
 
 }

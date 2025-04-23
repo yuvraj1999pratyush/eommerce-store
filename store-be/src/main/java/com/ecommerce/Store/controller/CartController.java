@@ -31,4 +31,9 @@ public class CartController {
         return cartService.getCartItems(userId);
     }
 
+    @GetMapping("/validate")
+    public ICartItems.validateResponse validateCouponEligibility(@RequestParam("user_id") String userId) {
+        return cartService.isUserEligibleForCoupon(userId);
+    }
+
 }
